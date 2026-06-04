@@ -1189,7 +1189,7 @@ class Program
 
 								default:
 									correcto = false;
-									Console.WriteLine("Opcion invalida");
+									Console.WriteLine("Opcion invalida, intente nuevamente");
 									break;
 							}
 						} while (!correcto);
@@ -1209,7 +1209,7 @@ class Program
 								sintomas = Console.ReadLine();
 								if (string.IsNullOrWhiteSpace(sintomas))
 								{
-									Console.WriteLine("No puede quedar vacio");
+									Console.WriteLine("No puede quedar vacio intente nuevamente");
 								}
 							} while (string.IsNullOrWhiteSpace(sintomas));
 
@@ -1317,7 +1317,7 @@ class Program
 
 										if (string.IsNullOrWhiteSpace(talla))
 										{
-											Console.WriteLine("No puede quedar vacio");
+											Console.WriteLine("No puede quedar vacio intente nuevamente");
 										}
 
 									} while (string.IsNullOrWhiteSpace(talla));
@@ -1376,12 +1376,12 @@ class Program
 						string palabra;
 						do
 						{
-							Console.Write("Ingrese palabra a buscar: ");
+							Console.Write("Ingrese lo que desee buscar: ");
 							palabra = Console.ReadLine();
 
 							if (string.IsNullOrWhiteSpace(palabra))
 							{
-								Console.WriteLine("No puede quedar vacio");
+								Console.WriteLine("No puede quedar vacio intentelo nuevamente");
 							}
 
 						} while (string.IsNullOrWhiteSpace(palabra));
@@ -1415,7 +1415,7 @@ class Program
 							Console.WriteLine();
 							Console.WriteLine("1- Modificar Stock");
 
-							Console.WriteLine("2- Modificar Precio");
+							Console.WriteLine("2- Modificar Precio General");
 
 							Console.WriteLine("3- Modificar Precio Blister");
 
