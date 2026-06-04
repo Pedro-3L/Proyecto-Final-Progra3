@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data.SQLite;
 
+
 class Producto
 {
 	private string nombre;
