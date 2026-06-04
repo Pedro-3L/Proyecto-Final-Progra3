@@ -155,7 +155,6 @@ class Medicamento : Producto
 		get { return precioUnidad; }
 		set { precioUnidad = value; }
 	}
-
 	public Medicamento(
 		string nombre,
 		string presentacion,
