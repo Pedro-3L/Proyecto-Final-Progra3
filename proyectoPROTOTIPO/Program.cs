@@ -1719,9 +1719,7 @@ class Program
 
 						do
 						{
-							Console.WriteLine();
 							Console.WriteLine("1- Modificar Stock");
-							Console.WriteLine("2- Modificar Precio General");
 
 							if (categoriaProducto == "Medicamento")
 							{
@@ -1799,15 +1797,13 @@ class Program
 									correcto = false;
 									Console.WriteLine("Stock invalido");
 								}
-
 							} while (!correcto);
 
 							obj.ModificarStock(codigoModificar, stock);
 						}
-						else if (opcionModificar == 2)
+						else if (opcionModificar == 2 && categoriaProducto != "Medicamento")
 						{
 							double precio;
-
 							do
 							{
 								Console.Write("Nuevo precio: ");
