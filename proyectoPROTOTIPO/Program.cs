@@ -552,8 +552,10 @@ class SistemaFarmacia
 
 			SQLiteDataReader lector = comando.ExecuteReader();
 
-			Console.WriteLine();
-			Console.WriteLine("===== PRODUCTOS =====");
+			Console.WriteLine("╔════════════════╗");
+			Console.WriteLine("║   PRODUCTOS    ║");
+			Console.WriteLine("╚════════════════╝");
+
 			while (lector.Read())
 			{
 				MostrarProducto(lector);
@@ -581,10 +583,10 @@ class SistemaFarmacia
 			"OR laboratorio LIKE @palabra " +
 			"OR viaAdministracion LIKE @palabra " +
 			"OR tipoSuero LIKE @palabra " +
-			"OR sabor LIKE @palabra" +
+			"OR sabor LIKE @palabra " +
 			"OR talla LIKE @palabra " +
 			"OR uso LIKE @palabra " +
-			"OR unidadStock LIKE @palabra";
+			"OR unidadStock LIKE @palabra ";
 
 			SQLiteCommand comando = new SQLiteCommand(sql, db);
 
@@ -1075,8 +1077,9 @@ class SistemaFarmacia
 
 			bool hayVentas = false;
 
-			Console.WriteLine();
-			Console.WriteLine("===== HISTORIAL DE VENTAS =====");
+			Console.WriteLine("╔═══════════════════════╗");
+			Console.WriteLine("║  HISTORIAL DE VENTAS  ║");
+			Console.WriteLine("╚═══════════════════════╝");
 
 			while (lector.Read())
 			{
@@ -1097,6 +1100,10 @@ class Program
 {
 	static void Main()
 	{
+
+		Console.ForegroundColor = ConsoleColor.DarkCyan;
+		Console.Clear();
+
 		SistemaFarmacia obj = new SistemaFarmacia();
 
 		obj.CrearTabla();
@@ -1110,8 +1117,9 @@ class Program
 			do
 			{
 				Console.Clear();
-				Console.WriteLine("===== MENU =====");
-
+				Console.WriteLine("╔══════════════════════════════════════════════════╗");
+				Console.WriteLine("║SISTEMA DE VENTA DE MEDICINA Y PRODUCTOS EL SHADAI║");
+				Console.WriteLine("╚══════════════════════════════════════════════════╝");
 				Console.WriteLine("1- Agregar Producto");
 
 				Console.WriteLine("2- Mostrar Productos");
@@ -1146,6 +1154,8 @@ class Program
 			switch (opcion)
 			{
 				case 1:
+					Console.ForegroundColor = ConsoleColor.Yellow;
+					Console.Clear();
 					{
 						string nombre;
 						do
@@ -1661,6 +1671,9 @@ class Program
 
 				case 2:
 					{
+						Console.ForegroundColor = ConsoleColor.Yellow;
+						Console.Clear();
+
 						obj.Mostrar();
 						Console.ReadKey();
 					}
@@ -1668,6 +1681,9 @@ class Program
 
 				case 3:
 					{
+						Console.ForegroundColor = ConsoleColor.Cyan;
+						Console.Clear();
+
 						string palabra;
 						do
 						{
@@ -1689,6 +1705,8 @@ class Program
 
 				case 4:
 					{
+						Console.ForegroundColor = ConsoleColor.White;
+
 						int codigoModificar;
 						do
 						{
@@ -1719,7 +1737,9 @@ class Program
 
 						do
 						{
+							Console.WriteLine();
 							Console.WriteLine("1- Modificar Stock");
+							Console.WriteLine("2- Modificar Precio General");
 
 							if (categoriaProducto == "Medicamento")
 							{
@@ -1797,13 +1817,15 @@ class Program
 									correcto = false;
 									Console.WriteLine("Stock invalido");
 								}
+
 							} while (!correcto);
 
 							obj.ModificarStock(codigoModificar, stock);
 						}
-						else if (opcionModificar == 2 && categoriaProducto != "Medicamento")
+						else if (opcionModificar == 2)
 						{
 							double precio;
+
 							do
 							{
 								Console.Write("Nuevo precio: ");
@@ -1900,6 +1922,9 @@ class Program
 
 				case 5:
 					{
+						Console.ForegroundColor = ConsoleColor.Red;
+						Console.Clear();
+
 						int codigoEliminar;
 						do
 						{
@@ -1921,6 +1946,9 @@ class Program
 
 				case 6:
 					{
+						Console.ForegroundColor = ConsoleColor.Green;
+						Console.Clear();
+
 						double totalVenta = 0;
 						int continuar;
 						do
@@ -1978,9 +2006,9 @@ class Program
 
 						} while (continuar == 1);
 
-						Console.WriteLine();
-
-						Console.WriteLine("===== RESUMEN DE VENTA =====");
+						Console.WriteLine("╔══════════════════════╗");
+						Console.WriteLine("║   RESUMEN DE VENTA   ║");
+						Console.WriteLine("╚══════════════════════╝");
 
 						Console.WriteLine("Total a pagar: Q" + totalVenta);
 
@@ -1990,6 +2018,9 @@ class Program
 
 				case 7:
 					{
+						Console.ForegroundColor = ConsoleColor.Yellow;
+						Console.Clear();
+
 						obj.HistorialVentas();
 						Console.ReadKey();
 					}
@@ -1997,6 +2028,8 @@ class Program
 
 				case 8:
 					{
+						Console.ForegroundColor = ConsoleColor.Magenta;
+						Console.Clear();
 						Console.WriteLine("Saliendo del programa....");
 						Console.ReadKey();
 					}
