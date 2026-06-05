@@ -147,13 +147,25 @@ class Medicamento : Producto
 	public double PrecioBlister
 	{
 		get { return precioBlister; }
-		set { precioBlister = value; }
+		set
+		{
+			if (value > 0)
+			{
+				precioBlister = value;
+			}
+		}
 	}
 
 	public double PrecioUnidad
 	{
 		get { return precioUnidad; }
-		set { precioUnidad = value; }
+		set
+		{
+			if (value > 0)
+			{
+				precioUnidad = value;
+			}
+		}
 	}
 	public Medicamento(
 		string nombre,
@@ -174,14 +186,14 @@ class Medicamento : Producto
 		double precioUnidad)
 		: base(nombre, presentacion, precio, descripcion, marca, stock, unidadStock, categoria)
 	{
-		this.sintomas = sintomas;
-		this.enfermedad = enfermedad;
-		this.tipo = tipo;
-		this.principioActivo = principioActivo;
-		this.laboratorio = laboratorio;
-		this.viaAdministracion = viaAdministracion;
-		this.precioBlister = precioBlister;
-		this.precioUnidad = precioUnidad;
+		Sintomas = sintomas;
+		Enfermedad = enfermedad;
+		Tipo = tipo;
+		PrincipioActivo = principioActivo;
+		Laboratorio = laboratorio;
+		ViaAdministracion = viaAdministracion;
+		PrecioBlister = precioBlister;
+		PrecioUnidad = precioUnidad;
 	}
 
 }
@@ -216,8 +228,8 @@ class Suero : Producto
 		string tipoSuero)
 		: base(nombre, presentacion, precio, descripcion, marca, stock, unidadStock, categoria)
 	{
-		this.sabor = sabor;
-		this.tipoSuero = tipoSuero;
+		Sabor = sabor;
+		TipoSuero = tipoSuero;
 	}
 }
 
@@ -243,7 +255,7 @@ class ProductoBebe : Producto
 		string talla)
 		: base(nombre, presentacion, precio, descripcion, marca, stock, unidadStock, categoria)
 	{
-		this.talla = talla;
+		Talla = talla;
 	}
 
 }
@@ -270,7 +282,7 @@ class InsumoMedico : Producto
 		string uso)
 		: base(nombre, presentacion, precio, descripcion, marca, stock, unidadStock, categoria)
 	{
-		this.uso = uso;
+		Uso = uso;
 	}
 
 }
@@ -297,7 +309,7 @@ class Higiene : Producto
 		string uso)
 		: base(nombre, presentacion, precio, descripcion, marca, stock, unidadStock, categoria)
 	{
-		this.uso = uso;
+		Uso = uso;
 	}
 }
 
@@ -313,7 +325,7 @@ class SistemaFarmacia
 
 			string sql = @"
             CREATE TABLE IF NOT EXISTS productos(
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			codigo INTEGER PRIMARY KEY AUTOINCREMENT,
 			nombre TEXT,
             precio REAL,
 			precioBlister REAL,
@@ -458,7 +470,7 @@ class SistemaFarmacia
 	{
 		string categoria = lector["categoria"].ToString();
 
-		Console.WriteLine("\nID: " + lector["id"]);
+		Console.WriteLine("\nCodigo: " + lector["codigo"]);
 
 		Console.WriteLine("Nombre: " + lector["nombre"]);
 
@@ -569,6 +581,7 @@ class SistemaFarmacia
 			"OR laboratorio LIKE @palabra " +
 			"OR viaAdministracion LIKE @palabra " +
 			"OR tipoSuero LIKE @palabra " +
+			"OR sabor LIKE @palabra" +
 			"OR talla LIKE @palabra " +
 			"OR uso LIKE @palabra " +
 			"OR unidadStock LIKE @palabra";
@@ -595,17 +608,17 @@ class SistemaFarmacia
 		}
 	}
 
-	public void Eliminar(int id)
+	public void Eliminar(int codigo)
 	{
 		using (SQLiteConnection db = new SQLiteConnection(conexion))
 		{
 			db.Open();
 
-			string sql = "DELETE FROM productos " + "WHERE id=@id";
+			string sql = "DELETE FROM productos " + "WHERE codigo=@codigo";
 
 			SQLiteCommand comando = new SQLiteCommand(sql, db);
 
-			comando.Parameters.AddWithValue("@id", id);
+			comando.Parameters.AddWithValue("@codigo", codigo);
 
 			int filas = comando.ExecuteNonQuery();
 
@@ -615,12 +628,38 @@ class SistemaFarmacia
 			}
 			else
 			{
-				Console.WriteLine("ID no encontrado");
+				Console.WriteLine("Codigo no encontrado");
 			}
 		}
 	}
 
-	public void ModificarStock(int id, int stock)
+	public string ObtenerCategoria(int codigo)
+	{
+		using (SQLiteConnection db = new SQLiteConnection(conexion))
+		{
+			db.Open();
+
+			string sql =
+			"SELECT categoria " +
+			"FROM productos " +
+			"WHERE codigo=@codigo";
+
+			SQLiteCommand comando = new SQLiteCommand(sql, db);
+
+			comando.Parameters.AddWithValue("@codigo", codigo);
+
+			object resultado = comando.ExecuteScalar();
+
+			if (resultado != null)
+			{
+				return resultado.ToString();
+			}
+
+			return "";
+		}
+	}
+
+	public void ModificarStock(int codigo, int stock)
 	{
 		using (SQLiteConnection db = new SQLiteConnection(conexion))
 		{
@@ -629,13 +668,13 @@ class SistemaFarmacia
 			string sql =
 			"UPDATE productos " +
 			"SET stock=@stock " +
-			"WHERE id=@id";
+			"WHERE codigo=@codigo";
 
 			SQLiteCommand comando = new SQLiteCommand(sql, db);
 
 			comando.Parameters.AddWithValue("@stock", stock);
 
-			comando.Parameters.AddWithValue("@id", id);
+			comando.Parameters.AddWithValue("@codigo", codigo);
 
 			int filas = comando.ExecuteNonQuery();
 
@@ -645,11 +684,11 @@ class SistemaFarmacia
 			}
 			else
 			{
-				Console.WriteLine("ID no encontrado");
+				Console.WriteLine("Codigo no encontrado");
 			}
 		}
 	}
-	public void ModificarPrecio(int id, double precio)
+	public void ModificarPrecio(int codigo, double precio)
 	{
 		using (SQLiteConnection db = new SQLiteConnection(conexion))
 		{
@@ -658,13 +697,13 @@ class SistemaFarmacia
 			string sql =
 			"UPDATE productos " +
 			"SET precio=@precio " +
-			"WHERE id=@id";
+			"WHERE codigo=@codigo";
 
 			SQLiteCommand comando = new SQLiteCommand(sql, db);
 
 			comando.Parameters.AddWithValue("@precio", precio);
 
-			comando.Parameters.AddWithValue("@id", id);
+			comando.Parameters.AddWithValue("@codigo", codigo);
 
 			int filas = comando.ExecuteNonQuery();
 
@@ -674,12 +713,12 @@ class SistemaFarmacia
 			}
 			else
 			{
-				Console.WriteLine("ID no encontrado");
+				Console.WriteLine("Codigo no encontrado");
 			}
 		}
 	}
 
-	public void ModificarPrecioBlister(int id, double precioBlister, double precioUnidad)
+	public void ModificarPrecioBlister(int codigo, double precioBlister, double precioUnidad)
 	{
 		using (SQLiteConnection db = new SQLiteConnection(conexion))
 		{
@@ -690,7 +729,7 @@ class SistemaFarmacia
 			"SET precioBlister=@precioBlister, " +
 			"precioUnidad=@precioUnidad, " +
 			"precio=@precioBlister " +
-			"WHERE id=@id";
+			"WHERE codigo=@codigo";
 
 			SQLiteCommand comando = new SQLiteCommand(sql, db);
 
@@ -698,7 +737,7 @@ class SistemaFarmacia
 
 			comando.Parameters.AddWithValue("@precioUnidad", precioUnidad);
 
-			comando.Parameters.AddWithValue("@id", id);
+			comando.Parameters.AddWithValue("@codigo", codigo);
 
 			int filas = comando.ExecuteNonQuery();
 
@@ -708,12 +747,12 @@ class SistemaFarmacia
 			}
 			else
 			{
-				Console.WriteLine("ID no encontrado");
+				Console.WriteLine("Codigo no encontrado");
 			}
 		}
 	}
 
-	public void ModificarSabor(int id, string sabor)
+	public void ModificarSabor(int codigo, string sabor)
 	{
 		using (SQLiteConnection db = new SQLiteConnection(conexion))
 		{
@@ -722,13 +761,13 @@ class SistemaFarmacia
 			string sql =
 			"UPDATE productos " +
 			"SET sabor=@sabor " +
-			"WHERE id=@id";
+			"WHERE codigo=@codigo";
 
 			SQLiteCommand comando = new SQLiteCommand(sql, db);
 
 			comando.Parameters.AddWithValue("@sabor", sabor);
 
-			comando.Parameters.AddWithValue("@id", id);
+			comando.Parameters.AddWithValue("@codigo", codigo);
 
 			int filas = comando.ExecuteNonQuery();
 
@@ -738,12 +777,12 @@ class SistemaFarmacia
 			}
 			else
 			{
-				Console.WriteLine("ID no encontrado");
+				Console.WriteLine("Codigo no encontrado");
 			}
 		}
 	}
 
-	public void ModificarTalla(int id, string talla)
+	public void ModificarTalla(int codigo, string talla)
 	{
 		using (SQLiteConnection db = new SQLiteConnection(conexion))
 		{
@@ -752,13 +791,13 @@ class SistemaFarmacia
 			string sql =
 			"UPDATE productos " +
 			"SET talla=@talla " +
-			"WHERE id=@id";
+			"WHERE codigo=@codigo";
 
 			SQLiteCommand comando = new SQLiteCommand(sql, db);
 
 			comando.Parameters.AddWithValue("@talla", talla);
 
-			comando.Parameters.AddWithValue("@id", id);
+			comando.Parameters.AddWithValue("@codigo", codigo);
 
 			int filas = comando.ExecuteNonQuery();
 
@@ -768,12 +807,12 @@ class SistemaFarmacia
 			}
 			else
 			{
-				Console.WriteLine("ID no encontrado");
+				Console.WriteLine("Codigo no encontrado");
 			}
 		}
 	}
 
-	public void ModificarUso(int id, string uso)
+	public void ModificarUso(int codigo, string uso)
 	{
 		using (SQLiteConnection db = new SQLiteConnection(conexion))
 		{
@@ -781,13 +820,13 @@ class SistemaFarmacia
 			string sql =
 			"UPDATE productos " +
 			"SET uso=@uso " +
-			"WHERE id=@id";
+			"WHERE codigo=@codigo";
 
 			SQLiteCommand comando = new SQLiteCommand(sql, db);
 
 			comando.Parameters.AddWithValue("@uso", uso);
 
-			comando.Parameters.AddWithValue("@id", id);
+			comando.Parameters.AddWithValue("@codigo", codigo);
 
 			int filas = comando.ExecuteNonQuery();
 
@@ -797,11 +836,261 @@ class SistemaFarmacia
 			}
 			else
 			{
-				Console.WriteLine("ID no encontrado");
+				Console.WriteLine("Codigo no encontrado");
 			}
 		}
 	}
 
+	public void CrearTablaVentas()
+	{
+		using (SQLiteConnection db = new SQLiteConnection(conexion))
+		{
+			db.Open();
+
+			string sql = @"
+			CREATE TABLE IF NOT EXISTS ventas(
+			codigo INTEGER PRIMARY KEY AUTOINCREMENT,
+			codigoProducto INTEGER,
+			nombreProducto TEXT,
+			presentacion TEXT,
+			categoria TEXT,
+			sabor TEXT,
+			talla TEXT,
+			cantidad INTEGER,
+			precioUnitario REAL,
+			total REAL,
+			fecha TEXT
+			);";
+
+			SQLiteCommand comando = new SQLiteCommand(sql, db);
+
+			comando.ExecuteNonQuery();
+		}
+	}
+
+	public double VenderProducto(int codigo, int cantidad)
+	{
+		using (SQLiteConnection db = new SQLiteConnection(conexion))
+		{
+			db.Open();
+
+			string sqlBuscar =
+			"SELECT * " +
+			"FROM productos " +
+			"WHERE codigo=@codigo";
+
+			SQLiteCommand comandoBuscar = new SQLiteCommand(sqlBuscar, db);
+
+			comandoBuscar.Parameters.AddWithValue("@codigo", codigo);
+
+			SQLiteDataReader lector = comandoBuscar.ExecuteReader();
+
+			if (!lector.Read())
+			{
+				Console.WriteLine("Codigo no encontrado");
+				return 0;
+			}
+
+			string nombre = lector["nombre"].ToString();
+
+			string presentacion = lector["presentacion"].ToString();
+
+			string categoria = lector["categoria"].ToString();
+
+			string sabor = lector["sabor"].ToString();
+
+			string talla = lector["talla"].ToString();
+
+			int stockActual = Convert.ToInt32(lector["stock"]);
+
+			double precio = Convert.ToDouble(lector["precio"]);
+
+			double precioBlister = Convert.ToDouble(lector["precioBlister"]);
+
+			double precioUnidad = Convert.ToDouble(lector["precioUnidad"]);
+
+			lector.Close();
+
+
+
+			if (cantidad > stockActual)
+			{
+				Console.WriteLine("No hay suficiente stock");
+				return 0;
+			}
+
+			int nuevoStock = stockActual - cantidad;
+
+			string sqlActualizar =
+			"UPDATE productos " +
+			"SET stock=@stock " +
+			"WHERE codigo=@codigo";
+
+			SQLiteCommand comandoActualizar = new SQLiteCommand(sqlActualizar, db);
+
+			comandoActualizar.Parameters.AddWithValue("@stock", nuevoStock);
+
+			comandoActualizar.Parameters.AddWithValue("@codigo", codigo);
+
+			comandoActualizar.ExecuteNonQuery();
+
+			if (categoria == "Medicamento" &&
+				precioBlister > 0 &&
+				precioUnidad > 0)
+			{
+				int opcionVenta;
+				bool correcto;
+
+				do
+				{
+					Console.WriteLine();
+					Console.WriteLine("Tipo de venta:");
+
+					Console.WriteLine("1- Blister");
+
+					Console.WriteLine("2- Unidad");
+
+					Console.Write("Seleccione una opcion: ");
+
+					correcto =
+					int.TryParse(Console.ReadLine(),
+					out opcionVenta);
+
+					if (opcionVenta != 1 && opcionVenta != 2)
+					{
+						correcto = false;
+						Console.WriteLine("Opcion invalida");
+					}
+
+				} while (!correcto);
+
+				if (opcionVenta == 1)
+				{
+					precio = precioBlister;
+				}
+				else
+				{
+					precio = precioUnidad;
+				}
+			}
+
+			double total = precio * cantidad;
+
+			string fecha = DateTime.Now.ToString("");
+
+			string sqlVenta =
+			"INSERT INTO ventas " +
+			"(codigoProducto,nombreProducto,presentacion," +
+			"categoria,sabor,talla,cantidad," +
+			 "precioUnitario,total,fecha) " +
+			"VALUES " +
+			"(@codigoProducto,@nombreProducto,@presentacion," +
+			"@categoria,@sabor,@talla,@cantidad," +
+			"@precioUnitario,@total,@fecha)";
+
+			SQLiteCommand comandoVenta = new SQLiteCommand(sqlVenta, db);
+
+			comandoVenta.Parameters.AddWithValue("@codigoProducto", codigo);
+
+			comandoVenta.Parameters.AddWithValue("@nombreProducto", nombre);
+
+			comandoVenta.Parameters.AddWithValue("@presentacion", presentacion);
+
+			comandoVenta.Parameters.AddWithValue("@categoria", categoria);
+
+			comandoVenta.Parameters.AddWithValue("@sabor", sabor);
+
+			comandoVenta.Parameters.AddWithValue("@talla", talla);
+
+			comandoVenta.Parameters.AddWithValue("@cantidad", cantidad);
+
+			comandoVenta.Parameters.AddWithValue("@precioUnitario", precio);
+
+			comandoVenta.Parameters.AddWithValue("@total", total);
+
+			comandoVenta.Parameters.AddWithValue("@fecha", fecha);
+
+			comandoVenta.ExecuteNonQuery();
+
+			Console.WriteLine("Venta realizada");
+
+			Console.WriteLine("Total: Q" + total);
+
+			Console.WriteLine("Stock restante: " + nuevoStock);
+
+			return total;
+		}
+	}
+	private void MostrarVenta(SQLiteDataReader lector)
+	{
+		Console.WriteLine("\nNumero Venta: #" + lector["codigo"]);
+
+		Console.WriteLine("Nombre: " + lector["nombreProducto"]);
+
+		Console.WriteLine("Codigo Producto: " + lector["codigoProducto"]);
+
+		Console.WriteLine("Presentacion: " + lector["presentacion"]);
+
+		Console.WriteLine("Precio Unitario: Q" + lector["precioUnitario"]);
+
+		Console.WriteLine("Categoria: " + lector["categoria"]);
+
+		if (lector["categoria"].ToString() == "Suero")
+		{
+			if (!string.IsNullOrWhiteSpace(lector["sabor"].ToString()))
+			{
+				Console.WriteLine("Sabor: " + lector["sabor"]);
+			}
+		}
+
+		if (lector["categoria"].ToString() == "ProductoBebe")
+		{
+			if (!string.IsNullOrWhiteSpace(lector["talla"].ToString()))
+			{
+				Console.WriteLine("Talla: " + lector["talla"]);
+			}
+		}
+
+		Console.WriteLine("Cantidad Vendida: " + lector["cantidad"]);
+
+		Console.WriteLine("Total: Q" + lector["total"]);
+
+		Console.WriteLine("Fecha: " + lector["fecha"]);
+
+		Console.WriteLine("\n------------------------");
+	}
+	public void HistorialVentas()
+	{
+		using (SQLiteConnection db = new SQLiteConnection(conexion))
+		{
+			db.Open();
+
+			string sql =
+			"SELECT * FROM ventas " +
+			"ORDER BY codigo DESC";
+
+			SQLiteCommand comando = new SQLiteCommand(sql, db);
+
+			SQLiteDataReader lector = comando.ExecuteReader();
+
+			bool hayVentas = false;
+
+			Console.WriteLine();
+			Console.WriteLine("===== HISTORIAL DE VENTAS =====");
+
+			while (lector.Read())
+			{
+				hayVentas = true;
+
+				MostrarVenta(lector);
+			}
+
+			if (!hayVentas)
+			{
+				Console.WriteLine("No existen ventas registradas");
+			}
+		}
+	}
 }
 
 class Program
@@ -811,6 +1100,7 @@ class Program
 		SistemaFarmacia obj = new SistemaFarmacia();
 
 		obj.CrearTabla();
+		obj.CrearTablaVentas();
 
 		int opcion;
 		bool correcto;
@@ -832,13 +1122,17 @@ class Program
 
 				Console.WriteLine("5- Eliminar Producto");
 
-				Console.WriteLine("6- Salir");
+				Console.WriteLine("6- Vender Producto");
+
+				Console.WriteLine("7- Historial de Ventas");
+
+				Console.WriteLine("8- Salir");
 
 				Console.Write("Seleccione una opcion: ");
 
 				correcto = int.TryParse(Console.ReadLine(), out opcion);
 
-				if (opcion < 1 || opcion > 6)
+				if (opcion < 1 || opcion > 8)
 				{
 					correcto = false;
 					Console.WriteLine("Opcion invalida intentelo nuevamente");
@@ -1018,6 +1312,7 @@ class Program
 								if (precioBlister <= 0)
 								{
 									correcto = false;
+									Console.WriteLine("Precio invalido ingreselo nuevamente");
 								}
 							} while (!correcto);
 
@@ -1028,6 +1323,7 @@ class Program
 								if (precioUnidad <= 0)
 								{
 									correcto = false;
+									Console.WriteLine("Precio invalido ingreselo nuevamente");
 								}
 							} while (!correcto);
 
@@ -1092,17 +1388,17 @@ class Program
 							Console.WriteLine();
 							Console.WriteLine("Unidad de Stock");
 
-							Console.WriteLine("1- Unidad");
+							Console.WriteLine("1- Unidad/es");
 
-							Console.WriteLine("2- Caja");
+							Console.WriteLine("2- Caja/s");
 
-							Console.WriteLine("3- Blister");
+							Console.WriteLine("3- Blister/s");
 
-							Console.WriteLine("4- Paquete");
+							Console.WriteLine("4- Paquete/s");
 
-							Console.WriteLine("5- Botella");
+							Console.WriteLine("5- Botella/s");
 
-							Console.WriteLine("6- Sobre");
+							Console.WriteLine("6- Sobre/s");
 
 							Console.Write("Seleccione una opcion: ");
 
@@ -1303,29 +1599,29 @@ class Program
 							obj.Agregar(suero);
 						}
 
-							else if (categoria == "ProductoBebe")
+						else if (categoria == "ProductoBebe")
+						{
+							string talla = "";
+
+							if (presentacion == "Pañal")
 							{
-								string talla = "";
-
-								if (presentacion == "Pañal")
+								do
 								{
-									do
+									Console.Write("Talla: ");
+									talla = Console.ReadLine();
+
+									if (string.IsNullOrWhiteSpace(talla))
 									{
-										Console.Write("Talla: ");
-										talla = Console.ReadLine();
+										Console.WriteLine("No puede quedar vacio intente nuevamente");
+									}
 
-										if (string.IsNullOrWhiteSpace(talla))
-										{
-											Console.WriteLine("No puede quedar vacio intente nuevamente");
-										}
-
-									} while (string.IsNullOrWhiteSpace(talla));
-								}
+								} while (string.IsNullOrWhiteSpace(talla));
+							}
 
 							ProductoBebe bebe = new ProductoBebe(nombre, presentacion, precio, descripcion, marca, stock, unidadStock, categoria, talla);
 							obj.Agregar(bebe);
 						}
-					
+
 						else if (categoria == "InsumoMedico")
 						{
 							string uso;
@@ -1393,19 +1689,31 @@ class Program
 
 				case 4:
 					{
-						int idModificar;
+						int codigoModificar;
 						do
 						{
-							Console.Write("Ingrese ID: ");
-							correcto = int.TryParse(Console.ReadLine(), out idModificar);
+							Console.Write("Ingrese el codigo del producto: ");
+							correcto =int.TryParse(Console.ReadLine(),out codigoModificar);
 
-							if (idModificar <= 0)
+							if (codigoModificar <= 0)
 							{
 								correcto = false;
-								Console.WriteLine("ID invalido");
+								Console.WriteLine("Codigo invalido");
 							}
 
 						} while (!correcto);
+
+						string categoriaProducto =	obj.ObtenerCategoria(codigoModificar);
+
+						if (categoriaProducto == "")
+						{
+							Console.WriteLine("Codigo no encontrado");
+							Console.ReadKey();
+							break;
+						}
+
+						Console.WriteLine();
+						Console.WriteLine("Categoria: " + categoriaProducto);
 
 						int opcionModificar;
 
@@ -1413,27 +1721,68 @@ class Program
 						{
 							Console.WriteLine();
 							Console.WriteLine("1- Modificar Stock");
-
 							Console.WriteLine("2- Modificar Precio General");
 
-							Console.WriteLine("3- Modificar Precio Blister");
+							if (categoriaProducto == "Medicamento")
+							{
+								Console.WriteLine("3- Modificar Precio Blister");
+							}
 
-							Console.WriteLine("4- Modificar Sabor");
+							if (categoriaProducto == "Suero")
+							{
+								Console.WriteLine("4- Modificar Sabor");
+							}
 
-							Console.WriteLine("5- Modificar Talla");
+							if (categoriaProducto == "ProductoBebe")
+							{
+								Console.WriteLine("5- Modificar Talla");
+							}
 
-							Console.WriteLine("6- Modificar Uso");
+							if (categoriaProducto == "InsumoMedico" ||	categoriaProducto == "Higiene")
+							{
+								Console.WriteLine("6- Modificar Uso");
+							}
 
 							Console.Write("Seleccione una opcion: ");
+							correcto =int.TryParse(Console.ReadLine(),
+							out opcionModificar);
 
-							correcto = int.TryParse(Console.ReadLine(), out opcionModificar);
-
-							if (opcionModificar < 1 || opcionModificar > 6)
+							if (!correcto)
 							{
-								correcto = false;
-								Console.WriteLine("Opcion invalida");
+								Console.WriteLine("Opcion invalida vuelva a intentarlo");
+								continue;
 							}
-						} while (!correcto);
+
+							if (opcionModificar == 1 ||	opcionModificar == 2)
+							{
+								break;
+							}
+
+							if (opcionModificar == 3 && categoriaProducto == "Medicamento")
+							{
+								break;
+							}
+
+							if (opcionModificar == 4 &&  categoriaProducto == "Suero")
+							{
+								break;
+							}
+
+							if (opcionModificar == 5 && categoriaProducto == "ProductoBebe")
+							{
+								break;
+							}
+
+							if (opcionModificar == 6 && (categoriaProducto == "InsumoMedico" ||  categoriaProducto == "Higiene"))
+							{
+								break;
+							}
+
+							correcto = false;
+
+							Console.WriteLine("Opcion invalida");
+
+						} while (true);
 
 						if (opcionModificar == 1)
 						{
@@ -1442,7 +1791,8 @@ class Program
 							do
 							{
 								Console.Write("Nuevo stock: ");
-								correcto = int.TryParse(Console.ReadLine(), out stock);
+								correcto =int.TryParse(Console.ReadLine(),
+								out stock);
 
 								if (stock < 0)
 								{
@@ -1452,88 +1802,101 @@ class Program
 
 							} while (!correcto);
 
-							obj.ModificarStock(idModificar, stock);
-
+							obj.ModificarStock(codigoModificar, stock);
 						}
 						else if (opcionModificar == 2)
 						{
 							double precio;
+
 							do
 							{
 								Console.Write("Nuevo precio: ");
-								correcto = double.TryParse(Console.ReadLine(), out precio);
+								correcto =	double.TryParse(Console.ReadLine(),
+								out precio);
+
 								if (precio <= 0)
 								{
 									correcto = false;
 									Console.WriteLine("Precio invalido");
 								}
+
 							} while (!correcto);
 
-							obj.ModificarPrecio(idModificar, precio);
+							obj.ModificarPrecio(codigoModificar, precio);
 						}
 						else if (opcionModificar == 3)
 						{
 							double precioBlister;
 							double precioUnidad;
+
 							do
 							{
 								Console.Write("Precio blister: ");
-								correcto = double.TryParse(Console.ReadLine(), out precioBlister);
+								correcto =double.TryParse(Console.ReadLine(),
+								out precioBlister);
+
 								if (precioBlister <= 0)
 								{
 									correcto = false;
+									Console.WriteLine("Precio invalido");
 								}
+
 							} while (!correcto);
 
 							do
 							{
 								Console.Write("Precio unidad: ");
-								correcto = double.TryParse(Console.ReadLine(), out precioUnidad);
+								correcto =	double.TryParse(Console.ReadLine(),
+								out precioUnidad);
+
 								if (precioUnidad <= 0)
 								{
 									correcto = false;
+									Console.WriteLine("Precio invalido");
 								}
+
 							} while (!correcto);
 
-							obj.ModificarPrecioBlister(idModificar, precioBlister, precioUnidad);
+							obj.ModificarPrecioBlister(	codigoModificar,precioBlister,precioUnidad);
 						}
-
 						else if (opcionModificar == 4)
 						{
 							string sabor;
+
 							do
 							{
-								Console.Write("Sabor: ");
+								Console.Write("Nuevo sabor: ");
 								sabor = Console.ReadLine();
+
 							} while (string.IsNullOrWhiteSpace(sabor));
 
-							obj.ModificarSabor(idModificar, sabor);
+							obj.ModificarSabor(codigoModificar, sabor);
 						}
-
 						else if (opcionModificar == 5)
 						{
 							string talla;
+
 							do
 							{
-								Console.Write("Talla: ");
+								Console.Write("Nueva talla: ");
 								talla = Console.ReadLine();
 
 							} while (string.IsNullOrWhiteSpace(talla));
 
-							obj.ModificarTalla(idModificar, talla);
+							obj.ModificarTalla(codigoModificar, talla);
 						}
-
 						else if (opcionModificar == 6)
 						{
 							string uso;
+
 							do
 							{
-								Console.Write("Uso: ");
+								Console.Write("Nuevo uso: ");
 								uso = Console.ReadLine();
 
 							} while (string.IsNullOrWhiteSpace(uso));
 
-							obj.ModificarUso(idModificar, uso);
+							obj.ModificarUso(codigoModificar, uso);
 						}
 						Console.ReadKey();
 					}
@@ -1541,20 +1904,20 @@ class Program
 
 				case 5:
 					{
-						int idEliminar;
+						int codigoEliminar;
 						do
 						{
-							Console.Write("Ingrese ID: ");
-							correcto = int.TryParse(Console.ReadLine(), out idEliminar);
+							Console.Write("Ingrese el codigo del producto: ");
+							correcto = int.TryParse(Console.ReadLine(), out codigoEliminar);
 
-							if (idEliminar <= 0)
+							if (codigoEliminar <= 0)
 							{
 								correcto = false;
-								Console.WriteLine("ID invalido");
+								Console.WriteLine("Codigo invalido");
 							}
 						} while (!correcto);
 
-						obj.Eliminar(idEliminar);
+						obj.Eliminar(codigoEliminar);
 
 						Console.ReadKey();
 					}
@@ -1562,11 +1925,87 @@ class Program
 
 				case 6:
 					{
+						double totalVenta = 0;
+						int continuar;
+						do
+						{
+							int codigo;
+
+							do
+							{
+								Console.Write("Codigo del producto: ");
+								correcto = int.TryParse(Console.ReadLine(), out codigo);
+								if (codigo <= 0)
+								{
+									correcto = false;
+									Console.WriteLine("Codigo invalido");
+								}
+
+							} while (!correcto);
+
+							int cantidad;
+
+							do
+							{
+								Console.Write("Cantidad: ");
+
+								correcto = int.TryParse(Console.ReadLine(), out cantidad);
+
+								if (cantidad <= 0)
+								{
+									correcto = false;
+									Console.WriteLine("Cantidad invalida");
+								}
+
+							} while (!correcto);
+
+							totalVenta += obj.VenderProducto(codigo, cantidad);
+
+							Console.WriteLine();
+
+							Console.WriteLine("¿Desea vender otro producto? ");
+
+							Console.WriteLine("1- Si");
+
+							Console.WriteLine("2- No");
+
+							do
+							{
+								Console.Write("Seleccione una opcion: ");
+								correcto = int.TryParse(Console.ReadLine(), out continuar);
+								if (continuar != 1 && continuar != 2)
+								{
+									correcto = false;
+									Console.WriteLine("Opcion invalida ingrese nuevamente");
+								}
+							} while (!correcto);
+
+						} while (continuar == 1);
+
+						Console.WriteLine();
+
+						Console.WriteLine("===== RESUMEN DE VENTA =====");
+
+						Console.WriteLine("Total a pagar: Q" + totalVenta);
+
+						Console.ReadKey();
+					}
+					break;
+
+				case 7:
+					{
+						obj.HistorialVentas();
+						Console.ReadKey();
+					}
+					break;
+
+				case 8:
+					{
 						Console.WriteLine("Saliendo del programa....");
 						Console.ReadKey();
 					}
 					break;
 			}
-		} while (opcion != 6);
+		} while (opcion != 8);
 	}
 }
